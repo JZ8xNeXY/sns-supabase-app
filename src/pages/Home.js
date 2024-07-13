@@ -2,10 +2,22 @@ import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { SessionContext } from "../SessionProvider";
 import { SideMenu } from "../components/SideMenu";
+import { authRepository } from "../repositories/auth";
 
 function Home() {
-  const { currentUser } = useContext(SessionContext);
+  const { currentUser, setCurrentUser } = useContext(SessionContext);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (currentUser == null) {
+      navigate("/signin", { replace: true });
+    }
+  }, [currentUser, navigate]);
+
+  const signout = async () => {
+    await authRepository.signout();
+    setCurrentUser(null);
+  };
 
   useEffect(() => {
     if (currentUser == null) {
@@ -18,7 +30,9 @@ function Home() {
       <header className="bg-[#34D399] p-4">
         <div className="container mx-auto flex items-center justify-between">
           <h1 className="text-3xl font-bold text-white">SNS APP</h1>
-          <button className="text-white hover:text-red-600">ログアウト</button>
+          <button onClick={signout} className="text-white hover:text-red-600">
+            ログアウト
+          </button>
         </div>
       </header>
       <div className="container mx-auto mt-6 p-4">

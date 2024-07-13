@@ -4,6 +4,10 @@ import { SessionContext } from "../SessionProvider";
 export function SideMenu() {
   const { currentUser } = useContext(SessionContext);
 
+  if (!currentUser) {
+    return true;
+  }
+
   return (
     <div className="bg-white p-4 rounded-lg shadow-md h-[200px] flex flex-col justify-center">
       <h2 className="text-xl font-semibold mb-4">Your Profile</h2>
