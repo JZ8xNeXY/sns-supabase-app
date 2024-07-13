@@ -2,13 +2,17 @@ import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SessionContext } from "../SessionProvider";
 import { SideMenu } from "../components/SideMenu";
+import { Pagination } from "../components/Pagination";
 import { Post } from "../components/post";
 import { authRepository } from "../repositories/auth";
 import { postRepository } from "../repositories/post";
 
+const limit = 5;
+
 function Home() {
   const [content, setContent] = useState("");
   const [posts, setPosts] = useState([]);
+  const [page, setPage] = useState(1);
   const { currentUser, setCurrentUser } = useContext(SessionContext);
   const navigate = useNavigate();
 
@@ -36,9 +40,21 @@ function Home() {
     setContent("");
   };
 
-  const fetchPosts = async () => {
-    const posts = await postRepository.find();
+  const fetchPosts = async (page) => {
+    const posts = await postRepository.find(page, limit);
     setPosts(posts);
+  };
+
+  const moveToNext = async () => {
+    const nextPage = page + 1;
+    await fetchPosts(nextPage);
+    setPage(nextPage);
+  };
+
+  const moveToPrev = async () => {
+    const prevPage = page - 1;
+    await fetchPosts(prevPage);
+    setPage(prevPage);
   };
 
   return (
@@ -74,6 +90,10 @@ function Home() {
                 <Post key={post.id} post={post} />
               ))}
             </div>
+            <Pagination
+              onPrev={page > 1 ? moveToPrev : null}
+              onNext={posts.length >= limit ? moveToNext : null}
+            />
           </div>
           <SideMenu />
         </div>
