@@ -1,15 +1,31 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
 import { authRepository } from "../repositories/auth";
+import { SessionContext } from "../SessionProvider";
 
 function Signup() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { currentUser, setCurrentUser } = useContext(SessionContext);
+  const navigate = useNavigate();
 
-  const signup = async () => {
-    const user = await authRepository.signup(name, email, password);
-    console.log(user);
+  const signup = async (e) => {
+    e.preventDefault();
+    try {
+      const user = await authRepository.signup(name, email, password);
+      setCurrentUser(user);
+      console.log(user);
+    } catch (error) {
+      console.error("Error signing up:", error);
+    }
   };
+
+  useEffect(() => {
+    if (currentUser != null) {
+      navigate("/", { replace: true });
+    }
+  }, [currentUser, navigate]);
 
   return (
     <div className="min-h-screen bg-gray-100 py-10 px-4 sm:px-6 lg:px-8">
