@@ -28,4 +28,10 @@ export const postRepository = {
       userName: post.user_metadata.name,
     }));
   },
+
+  async delete(id) {
+    const { error } = await supabase.from("posts").delete().eq("id", id);
+    if (error != null) throw new Error(error.message);
+    return true;
+  },
 };

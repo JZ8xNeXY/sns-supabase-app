@@ -57,6 +57,11 @@ function Home() {
     setPage(prevPage);
   };
 
+  const deletePost = async (postId) => {
+    await postRepository.delete(postId);
+    setPosts(posts.filter((post) => post.id !== postId));
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
       <header className="bg-[#34D399] p-4">
@@ -87,7 +92,7 @@ function Home() {
             </div>
             <div className="mt-4">
               {posts.map((post) => (
-                <Post key={post.id} post={post} />
+                <Post key={post.id} post={post} onDelete={deletePost} />
               ))}
             </div>
             <Pagination
