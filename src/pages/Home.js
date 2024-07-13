@@ -1,10 +1,14 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SessionContext } from "../SessionProvider";
 import { SideMenu } from "../components/SideMenu";
+import { Post } from "../components/post";
 import { authRepository } from "../repositories/auth";
+import { postRepository } from "../repositories/post";
 
 function Home() {
+  const [content, setContent] = useState("");
+  const [posts, setPosts] = useState([]);
   const { currentUser, setCurrentUser } = useContext(SessionContext);
   const navigate = useNavigate();
 
@@ -14,16 +18,28 @@ function Home() {
     }
   }, [currentUser, navigate]);
 
+  useEffect(() => {
+    fetchPosts();
+  }, []);
+
   const signout = async () => {
     await authRepository.signout();
     setCurrentUser(null);
   };
 
-  useEffect(() => {
-    if (currentUser == null) {
-      navigate("/signin", { replace: true });
-    }
-  }, [currentUser, navigate]);
+  const createPost = async () => {
+    const post = await postRepository.create(content, currentUser.id);
+    setPosts([
+      { ...post, userId: currentUser.id, userName: currentUser.userName },
+      ...posts,
+    ]);
+    setContent("");
+  };
+
+  const fetchPosts = async () => {
+    const posts = await postRepository.find();
+    setPosts(posts);
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -42,12 +58,22 @@ function Home() {
               <textarea
                 className="w-full p-2 mb-4 border-2 border-gray-200 rounded-md"
                 placeholder="What's on your mind?"
+                onChange={(e) => setContent(e.target.value)}
+                value={content}
               />
-              <button className="bg-[#34D399] text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed">
+              <button
+                onClick={createPost}
+                className="bg-[#34D399] text-white px-4 py-2 rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={content == ""}
+              >
                 Post
               </button>
             </div>
-            <div className="mt-4"></div>
+            <div className="mt-4">
+              {posts.map((post) => (
+                <Post key={post.id} post={post} />
+              ))}
+            </div>
           </div>
           <SideMenu />
         </div>
